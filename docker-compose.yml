@@ -1,0 +1,41 @@
+services:
+  kiwix:
+    build: ./kiwix
+    container_name: kiwix
+    volumes:
+      - ./zims:/zims
+    command: ["--address", "0.0.0.0", "--port", "8000"]
+    expose:
+      - "8000"
+    # WARNING: comment out the ports line in PRODUCTION!
+    ports:
+      - "8000:8000"
+
+  nginx-processor:
+    build: ./nginx-processor
+    container_name: kiwix-nginx-processor
+    depends_on:
+      - kiwix
+    expose:
+      - "8080"
+    volumes:
+      - ./nginx-processor/html:/usr/local/openresty/nginx/html:ro
+      - ./nginx-processor/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro
+    # WARNING: comment out the ports line in PRODUCTION!
+    ports:
+      - "8080:8080"
+
+  nginx-cache:
+    build: ./nginx-cache
+    container_name: kiwix-nginx-cache
+    depends_on:
+      - nginx-processor
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./nginx-cache/conf.d:/etc/nginx/conf.d:ro
+      - cache-data:/var/cache/nginx
+
+volumes:
+  cache-data:
+  kiwix-data:
