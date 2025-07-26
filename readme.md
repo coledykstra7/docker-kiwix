@@ -13,7 +13,7 @@ A containerized setup for running Kiwix server with a two-layer nginx proxy: one
 ## Architecture
 
 ```
-Internet → nginx-cache:8888 → nginx-processor:8080 → kiwix:8000 → ZIM files (in kiwix-data volume)
+Internet → nginx-cache:8888 → nginx-processor:8080 → kiwix:8000 → ZIM files
 ```
 
 - **nginx-cache**: Handles caching, compression, and security headers. Forwards requests to nginx-processor.
@@ -50,7 +50,7 @@ Internet → nginx-cache:8888 → nginx-processor:8080 → kiwix:8000 → ZIM fi
 
 ### nginx-processor Configuration
 
-The nginx-processor configuration (`nginx-processor/conf.d/nginx.conf`) includes:
+The nginx-processor configuration (`nginx-processor/nginx.conf`) includes:
 
 - **Content Blocking**: Configurable patterns to block specific content
 - **Link Stripping**: Removes external HTTP/HTTPS links from pages
@@ -67,7 +67,7 @@ The nginx-cache configuration (`nginx-cache/conf.d/default.conf`) includes:
 
 ### Content Filtering
 
-Current filtering rules (configurable in `nginx-processor/conf.d/nginx.conf`):
+Current filtering rules (configurable in `nginx-processor/nginx.conf`):
 
 ```lua
 -- Block specific content patterns
@@ -95,10 +95,10 @@ Since configurations are mounted externally, you can edit them without rebuildin
 
 ```bash
 # Edit nginx-processor configuration
-vim nginx-processor/conf.d/nginx.conf
+nano nginx-processor/nginx.conf
 
 # Edit nginx-cache configuration
-vim nginx-cache/conf.d/default.conf
+nano nginx-cache/conf.d/default.conf
 
 # Reload nginx-processor without rebuilding
 docker exec kiwix-nginx-processor nginx -s reload
@@ -161,18 +161,22 @@ docker-kiwix/
 
 ## Volumes
 
-- `kiwix-data:/data`: ZIM files and library configuration (managed by Docker)
-- `cache-data:/var/cache/nginx`: Nginx cache data (managed by Docker)
-- `./nginx-processor/html:/usr/local/openresty/nginx/html:ro`: Custom HTML pages
-- `./nginx-processor/conf.d:/usr/local/openresty/nginx/conf.d:ro`: Nginx processor configuration
-- `./nginx-cache/conf.d:/etc/nginx/conf.d:ro`: Nginx cache configuration
+* `./zims:/zims`: Maps the local `./zims` directory, containing your ZIM files, into the `kiwix` container.
+
+* `./nginx-processor/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro`: Mounts your custom configuration file over the default `nginx.conf` for the `nginx-processor` service.
+
+* `./nginx-processor/html:/usr/local/openresty/nginx/html:ro`: Provides custom HTML pages (like block/catch pages) to the `nginx-processor`.
+
+* `./nginx-cache/conf.d:/etc/nginx/conf.d:ro`: Provides the configuration for the `nginx-cache` service.
+
+* `cache-data:/var/cache/nginx`: A named volume managed by Docker to persistently store NGINX cache data.
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
-4. Test with `docker-compose up -d`
+4. Test with `docker compose up -d`
 5. Commit your changes (`git commit -m 'Add amazing feature'`)
 6. Push to the branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
@@ -185,13 +189,20 @@ This project is open source and available under the [MIT License](LICENSE).
 
 - [Kiwix](https://www.kiwix.org/) - Offline content serving
 - [OpenResty](https://openresty.org/) - High-performance web platform
+- [Nginx](https://nginx.org/) - Web server and reverse proxy
 - [Docker](https://www.docker.com/) - Containerization platform
 
 ## Support
 
 If you encounter issues:
 
-1. Check the logs: `docker-compose logs`
-2. Verify your ZIM files are in the `kiwix-data` volume
-3. Ensure `mylib.xml` is properly configured
-4. Open an issue on GitHub with relevant log output
+1.  **Check the logs for a specific service.** This is the most important step.
+    -   `docker compose logs nginx-cache`
+    -   `docker compose logs nginx-processor`
+    -   `docker compose logs kiwix`
+
+2.  **Verify your ZIM files** are placed directly inside the local `./zims` directory.
+
+3.  **Ensure the `entrypoint.sh` script** inside the `./kiwix` directory is creating the library file correctly. Check the `kiwix` service logs for its status messages.
+
+4.  **Open an issue on GitHub** with the relevant log output from the failing service.
