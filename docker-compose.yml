@@ -35,6 +35,7 @@ services:
     volumes:
       - ./nginx-cache/conf.d:/etc/nginx/conf.d:ro
       - cache-data:/var/cache/nginx
+      - ./nginx-cache/secrets:/etc/nginx/secrets:ro
 
 volumes:
   cache-data:

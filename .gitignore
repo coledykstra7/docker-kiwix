@@ -30,10 +30,8 @@ Thumbs.db
 .vim/
 
 # Environment and config files
-.env
-.env.local
-.env.production
-.env.staging
+.env*
+!.env.example
 
 # Logs
 *.log
@@ -47,3 +45,7 @@ logs/
 # Temporary files
 tmp/
 temp/
+
+# Password files
+secrets/
+.htpasswd

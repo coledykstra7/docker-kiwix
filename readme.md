@@ -9,6 +9,7 @@ A containerized setup for running Kiwix server with a two-layer nginx proxy: one
 - **nginx-cache**: Caching, compression, and security headers for external access
 - **Custom Error Pages**: Branded error handling for blocked content and searches
 - **Development-Friendly**: Externally mounted configurations for easy testing
+- **Optional Basic Authentication**: Easily secure your instance with a username and password.
 
 ## Architecture
 
@@ -46,6 +47,36 @@ Internet → nginx-cache:8888 → nginx-processor:8080 → kiwix:8000 → ZIM fi
     - Open your browser to `http://localhost:8888`
     - Browse your offline content!
 
+## Security: Enabling Password Protection (Optional)
+
+You can easily protect your Kiwix instance with a username and password (Basic Authentication). The `nginx-cache` service is pre-configured to enable authentication automatically if a password file is found.
+
+1.  **Create the Secrets Directory**
+    This directory will hold your password file.
+    ```bash
+    mkdir -p ./nginx-cache/secrets
+    ```
+
+2.  **Create the Password File (`.htpasswd`)**
+    Run the following command to create a `.htpasswd` file. It uses a temporary `xmartlabs/htpasswd` container to generate the password hash, so you don't need to install any extra tools on your host machine.
+
+    Replace `USERNAME` with the username you want.
+    Replace `PASSWORD` with the password you want.
+
+    ```bash
+    docker run --rm -ti xmartlabs/htpasswd USERNAME PASSWORD > ./nginx-cache/secrets/.htpasswd
+    ```
+
+    *To add more users, run the command again with a different username and append `>>` instead of `>`.*
+
+3.  **Restart the Services**
+    Apply the changes by restarting your containers.
+    ```bash
+    docker-compose restart
+    ```
+
+Now, when you access `http://localhost:8888`, your browser will prompt you for the username and password you just created. To disable authentication, simply delete the `./nginx-cache/secrets/.htpasswd` file and restart the services.
+
 ## Configuration
 
 ### nginx-processor Configuration
@@ -64,6 +95,7 @@ The nginx-cache configuration (`nginx-cache/conf.d/default.conf`) includes:
 - **Caching**: Improves performance for repeated requests
 - **Compression**: Reduces bandwidth usage
 - **Security Headers**: Adds basic security headers
+- **Authentication**: Automatically enabled if `/etc/nginx/secrets/.htpasswd` exists.
 
 ### Content Filtering
 
@@ -149,8 +181,9 @@ docker-kiwix/
 │       └── index.html
 ├── nginx-cache/
 │   ├── Dockerfile                    # Nginx cache container build
-│   └── conf.d/
-│       └── default.conf              # Cache nginx configuration
+│   ├── conf.d/
+│   │   └── default.conf              # Cache nginx configuration
+│   └── secrets/                      # (Optional) Holds .htpasswd file
 ```
 
 ## Ports
@@ -162,13 +195,10 @@ docker-kiwix/
 ## Volumes
 
 * `./zims:/zims`: Maps the local `./zims` directory, containing your ZIM files, into the `kiwix` container.
-
 * `./nginx-processor/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro`: Mounts your custom configuration file over the default `nginx.conf` for the `nginx-processor` service.
-
 * `./nginx-processor/html:/usr/local/openresty/nginx/html:ro`: Provides custom HTML pages (like block/catch pages) to the `nginx-processor`.
-
 * `./nginx-cache/conf.d:/etc/nginx/conf.d:ro`: Provides the configuration for the `nginx-cache` service.
-
+* `./nginx-cache/secrets:/etc/nginx/secrets:ro`: (Optional) Provides the `.htpasswd` file for Basic Authentication. The directory is mounted read-only for security.
 * `cache-data:/var/cache/nginx`: A named volume managed by Docker to persistently store NGINX cache data.
 
 ## Contributing

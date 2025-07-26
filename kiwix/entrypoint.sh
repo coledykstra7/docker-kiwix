@@ -1,4 +1,5 @@
 #!/bin/sh
+# Entrypoint script for Kiwix server container
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
