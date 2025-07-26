@@ -17,9 +17,9 @@ A containerized setup for running Kiwix server with a two-layer nginx proxy: one
 Internet → nginx-cache:8888 → nginx-processor:8080 → kiwix:8000 → ZIM files
 ```
 
-- **nginx-cache**: Handles caching, compression, and security headers. Forwards requests to nginx-processor.
-- **nginx-processor** (OpenResty): Performs content filtering, link stripping, and custom error handling via Lua.
-- **kiwix**: Serves ZIM files and handles search functionality.
+- **nginx-cache: Acts as the public gateway.**: Handles caching, compression, and security headers. Forwards requests to `nginx-processor`.
+- **nginx-processor: Filters and processes content.** (OpenResty): Uses Nginx/Lua to strip external links and apply custom rules before forwarding requests to `kiwix`. No awareness of `nginx-cache`.
+- **kiwix: Serves the ZIM content.**: Responds to requests from `nginx-processor` without any awareness of the upstream proxies.
 - **Volumes**: Configuration and content files mounted externally for easy development.
 
 ## Prerequisites
@@ -31,12 +31,16 @@ Internet → nginx-cache:8888 → nginx-processor:8080 → kiwix:8000 → ZIM fi
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/coledykstra7/docker-kiwix.git](https://github.com/coledykstra7/docker-kiwix.git)
+    git clone https://github.com/coledykstra7/docker-kiwix.git
     cd docker-kiwix
     ```
 
-2.  **Add Your Content 📚**
-    Place your Kiwix ZIM files (`.zim`) into the `./zims` directory. The Kiwix container will automatically detect and serve any files it finds here.
+2.  **Create Content Directory and Add ZIM Files 📚**
+    Create the `zims` directory, then place your Kiwix ZIM files (`.zim`) inside it. The Kiwix container will automatically detect and serve any files it finds here.
+    ```bash
+    mkdir zims
+    # Now, move/copy your .zim files into the new ./zims folder
+    ```
 
 3.  **Start the Services**
     ```bash
