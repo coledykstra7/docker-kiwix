@@ -150,8 +150,8 @@ docker exec kiwix-nginx-cache nginx -s reload
 docker-compose logs
 
 # View specific service logs
-docker-compose logs nginx-processor
-docker-compose logs nginx-cache
+docker-compose logs kiwix-nginx-processor
+docker-compose logs kiwix-nginx-cache
 docker-compose logs kiwix
 
 # Follow logs in real-time
