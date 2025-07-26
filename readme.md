@@ -227,8 +227,8 @@ This project is open source and available under the [MIT License](LICENSE).
 If you encounter issues:
 
 1.  **Check the logs for a specific service.** This is the most important step.
-    -   `docker compose logs nginx-cache`
-    -   `docker compose logs nginx-processor`
+    -   `docker compose logs kiwix-nginx-cache`
+    -   `docker compose logs kiwix-nginx-processor`
     -   `docker compose logs kiwix`
 
 2.  **Verify your ZIM files** are placed directly inside the local `./zims` directory.
