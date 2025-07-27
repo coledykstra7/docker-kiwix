@@ -170,24 +170,30 @@ docker-compose logs nginx-processor | grep -i debug
 
 ```
 docker-kiwix/
-├── docker-compose.yml                # Container orchestration
-├── .gitignore                        # Git ignore rules
+├── docker-compose.yml                   # Container orchestration
+├── .gitignore                           # Git ignore rules
+├── readme.md                            # Project documentation
 ├── kiwix/
-│   └── Dockerfile                    # Kiwix container build
-│   └── entrypoint.sh                 # Entrypoint script for kiwix
+│   ├── Dockerfile                       # Kiwix container build
+│   └── entrypoint.sh                    # Entrypoint script for kiwix
 ├── nginx-processor/
-│   ├── Dockerfile                    # Nginx processor container build
-│   ├── nginx.conf                    # Main nginx configuration
-│   └── html/                         # Custom HTML pages
-│       ├── catch_block.html
-│       ├── catch_external.html
-│       ├── catch_search.html
-│       └── index.html
+│   ├── Dockerfile                       # Nginx processor container build
+│   ├── nginx.conf                       # Main nginx configuration
+│   ├── html/                            # Custom HTML pages
+│   │   ├── catch_block.html
+│   │   ├── catch_external.html
+│   │   ├── catch_search.html
+│   └── lua/                             # Lua scripts for content processing
+│       ├── access.lua
+│       ├── body_filter.lua
+│       └── header_filter.lua
 ├── nginx-cache/
-│   ├── Dockerfile                    # Nginx cache container build
+│   ├── Dockerfile                       # Nginx cache container build
+│   ├── 40-conditional-auth.sh           # Script for conditional basic auth
 │   ├── conf.d/
-│   │   └── default.conf              # Cache nginx configuration
-│   └── secrets/                      # (Optional) Holds .htpasswd file
+│   │   └── default.conf                 # Cache nginx configuration
+│   └── secrets/                         # (Optional) Holds .htpasswd file for auth
+├── zims/                                # Place your .zim files here
 ```
 
 ## Ports
