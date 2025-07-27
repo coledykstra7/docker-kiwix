@@ -21,6 +21,7 @@ services:
     volumes:
       - ./nginx-processor/html:/usr/local/openresty/nginx/html:ro
       - ./nginx-processor/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro
+      - ./nginx-processor/lua:/usr/local/openresty/nginx/lua:ro
     # WARNING: comment out the ports line in PRODUCTION!
     ports:
       - "8080:8080"
