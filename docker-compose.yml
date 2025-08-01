@@ -1,3 +1,5 @@
+# docker-kiwix/docker-compose.yml
+
 services:
   kiwix:
     build: ./kiwix
@@ -8,8 +10,8 @@ services:
     expose:
       - "8000"
     # WARNING: comment out the ports line in PRODUCTION!
-    ports:
-      - "8000:8000"
+    # ports:
+    #   - "8000:8000"
 
   nginx-processor:
     build: ./nginx-processor
@@ -23,8 +25,8 @@ services:
       - ./nginx-processor/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro
       - ./nginx-processor/lua:/usr/local/openresty/nginx/lua:ro
     # WARNING: comment out the ports line in PRODUCTION!
-    ports:
-      - "8080:8080"
+    # ports:
+    #  - "8080:8080"
 
   nginx-cache:
     build: ./nginx-cache
