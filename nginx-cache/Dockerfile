@@ -4,9 +4,17 @@ FROM nginx:alpine
 # Install nginx-module-cache-purge if needed
 # RUN apk add --no-cache nginx-mod-http-cache-purge
 
-# Create cache directory
-RUN mkdir -p /var/cache/nginx/kiwix && \
-    chown -R nginx:nginx /var/cache/nginx
+# Create cache directory structure with initial symlink (only if needed)
+RUN mkdir -p /var/cache/nginx && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    if [ ! -L /var/cache/nginx/kiwix ]; then \
+        INITIAL_CACHE_DIR="kiwix_cache_$(date +%s)" && \
+        mkdir -p "/var/cache/nginx/$INITIAL_CACHE_DIR" && \
+        ln -sf "$INITIAL_CACHE_DIR" /var/cache/nginx/kiwix && \
+        echo "Created initial cache symlink: /var/cache/nginx/kiwix -> $INITIAL_CACHE_DIR"; \
+    else \
+        echo "Cache symlink already exists, preserving existing setup"; \
+    fi
 
 # Remove default config
 RUN rm /etc/nginx/conf.d/default.conf

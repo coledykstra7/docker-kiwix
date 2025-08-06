@@ -123,6 +123,68 @@ end
 - `nginx-processor/html/catch_search.html` - Custom search page
 - `nginx-processor/html/index.html` - Landing page
 
+## Cache Management
+
+The system includes automated scripts for zero-downtime cache management in production.
+
+### Cache Rotation
+
+Rotate the nginx cache without service interruption:
+
+```bash
+sudo ./host_scripts/rotate_cache.sh
+```
+
+This creates a new timestamped cache directory and atomically swaps the symlink, then gracefully reloads nginx.
+
+### Cache Cleanup
+
+Remove old cache directories:
+
+```bash
+sudo ./host_scripts/purge_cache.sh
+```
+
+This safely removes old `kiwix_cache_*` directories while preserving the active cache.
+
+### When to Use Cache Rotation
+
+Cache rotation is **only needed** when you change nginx-processor configuration:
+
+- **nginx-processor rule changes**: Content filtering, Lua scripts, processing logic
+- **Cache corruption**: If cache becomes corrupted
+
+**Not needed for:**
+- Adding/removing ZIM files (handled automatically)
+- Normal operations (24h TTL expires content naturally)
+
+### Production Workflow
+
+1. **Make nginx-processor changes:**
+   ```bash
+   # Update configuration
+   nano nginx-processor/nginx.conf
+   docker exec kiwix-nginx-processor nginx -s reload
+   ```
+
+2. **Rotate cache:**
+   ```bash
+   sudo ./host_scripts/rotate_cache.sh
+   ```
+
+3. **Clean up (optional):**
+   ```bash
+   # Wait 5-10 minutes for active requests to complete, then purge old directories
+   sudo ./host_scripts/purge_cache.sh
+   ```
+
+### Monitoring
+
+```bash
+# Check cache usage
+docker exec kiwix-nginx-cache du -sh /var/cache/nginx/kiwix_cache_*
+```
+
 ## Development
 
 ### Modifying Configuration
@@ -173,6 +235,9 @@ docker-kiwix/
 ├── docker-compose.yml                   # Container orchestration
 ├── .gitignore                           # Git ignore rules
 ├── readme.md                            # Project documentation
+├── host_scripts/                        # Cache management scripts
+│   ├── rotate_cache.sh                  # Atomic cache rotation script
+│   └── purge_cache.sh                   # Old cache cleanup script
 ├── kiwix/
 │   ├── Dockerfile                       # Kiwix container build
 │   └── entrypoint.sh                    # Entrypoint script for kiwix
