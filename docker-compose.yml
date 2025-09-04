@@ -6,12 +6,17 @@ services:
     container_name: kiwix
     volumes:
       - ./zims:/zims
-    command: ["--address", "0.0.0.0", "--port", "8000"]
+    command: ["--address", "0.0.0.0", "--port", "80", "--blockexternal"]
     expose:
-      - "8000"
-    # WARNING: comment out the ports line in PRODUCTION!
+      - "80"
     ports:
-      - "8666:8000"
+      - "8666:80"
+    # --- New lines added for OOM killer and restart policy ---
+    mem_limit: 1g            # Set a memory limit (e.g., 2 gigabytes).
+                             # This is the threshold at which the container will be killed.
+    restart: unless-stopped  # This policy will automatically restart the container
+                             # if it is killed by the OOM killer or fails for any other reason,
+                             # unless you explicitly stop it yourself.
 
   nginx-processor:
     build: ./nginx-processor
@@ -19,22 +24,23 @@ services:
     depends_on:
       - kiwix
     expose:
-      - "8080"
+      - "80"
     volumes:
       - ./nginx-processor/html:/usr/local/openresty/nginx/html:ro
       - ./nginx-processor/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro
       - ./nginx-processor/lua:/usr/local/openresty/nginx/lua:ro
-    # WARNING: comment out the ports line in PRODUCTION!
     ports:
-     - "8777:8080"
+      - "8777:80"
 
   nginx-cache:
     build: ./nginx-cache
     container_name: kiwix-nginx-cache
     depends_on:
       - nginx-processor
+    expose:
+      - "80"
     ports:
-      - "8888:8888"
+      - "80:80"
     volumes:
       - ./nginx-cache/conf.d:/etc/nginx/conf.d:ro
       - cache-data:/var/cache/nginx

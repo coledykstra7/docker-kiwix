@@ -1,12 +1,18 @@
 #!/bin/sh
 # Entrypoint script for Kiwix server container
+# Start cron daemon
+crond
+
+# Add cron job to restart kiwix-serve every night at 1am
+echo "0 1 * * * /restart-kiwix-serve.sh" > /etc/crontabs/root
+
 
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
 # Define the path for the library file
 ZIMS_PATH="/zims"
-LIBRARY_PATH="$ZIMS_PATH/library.xml"
+export LIBRARY_PATH="$ZIMS_PATH/library.xml"
 
 # Check if there are any ZIM files in the zims directory
 # The `find` command will exit with a status of 1 if no files are found.
@@ -28,4 +34,4 @@ fi
 # The --library flag tells kiwix-serve where to find the content catalog.
 # "$@" passes along any arguments from the Dockerfile's CMD.
 echo "Starting Kiwix server..."
-exec kiwix-serve --library "$LIBRARY_PATH" "$@"
+exec /kiwix-serve-cmd.sh "$@"
